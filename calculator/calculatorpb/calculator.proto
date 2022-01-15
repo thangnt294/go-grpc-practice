@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package calculator;
+
+option go_package = "calculatorpb";
+
+// Calculate sum unary API
+message CalSumRequest {
+  int32 first_number = 1;
+  int32 second_number = 2;
+}
+
+message CalSumResponse {
+  int32 result = 1;
+}
+
+service CalSumService {
+  // Unary API
+  rpc CalSum(CalSumRequest) returns (CalSumResponse) {};
+}
+
+message PrimeDecompositionRequest {
+  int32 number = 1;
+}
+
+message PrimeDecompositionResponse {
+  int32 result = 1;
+}
+
+service PrimeDecompositionService {
+  // Server Streaming API
+  rpc PrimeDecomposition(PrimeDecompositionRequest) returns (stream PrimeDecompositionResponse) {};
+}

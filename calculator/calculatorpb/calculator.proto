@@ -31,3 +31,16 @@ service PrimeDecompositionService {
   // Server Streaming API
   rpc PrimeDecomposition(PrimeDecompositionRequest) returns (stream PrimeDecompositionResponse) {};
 }
+
+message AverageRequest {
+  int32 number = 1;
+}
+
+message AverageResponse {
+  float result = 1;
+}
+
+service AverageService {
+  // Client Streaming API
+  rpc Average(stream AverageRequest) returns (AverageResponse) {};
+}

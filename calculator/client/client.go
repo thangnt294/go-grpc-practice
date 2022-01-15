@@ -6,6 +6,7 @@ import (
 	"grpc-greet/calculator/calculatorpb"
 	"io"
 	"log"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -24,8 +25,11 @@ func main () {
 	// c := calculatorpb.NewCalSumServiceClient(cc)
 	// doUnary(c)
 
-	css := calculatorpb.NewPrimeDecompositionServiceClient(cc)
-	doServerStreaming(css)
+	// css := calculatorpb.NewPrimeDecompositionServiceClient(cc)
+	// doServerStreaming(css)
+
+	ccs := calculatorpb.NewAverageServiceClient(cc)
+	doClientStreaming(ccs)
 }
 
 func doUnary(c calculatorpb.CalSumServiceClient) {
@@ -61,4 +65,29 @@ func doServerStreaming(c calculatorpb.PrimeDecompositionServiceClient) {
 
 		fmt.Println(msg.GetResult())
 	}
+}
+
+func doClientStreaming(c calculatorpb.AverageServiceClient) {
+	fmt.Println("Starting a Client Streaming Call...")
+
+	numbers := [4]int32{1,2,3,4}
+
+	stream, err := c.Average(context.Background())
+	if err != nil {
+		log.Fatalf("Error creating stream: %v", err)
+	}
+
+	for _, number := range numbers {
+		fmt.Printf("Sending number %v\n", number)
+		stream.Send(&calculatorpb.AverageRequest{
+			Number: number,
+		})
+		time.Sleep(time.Second)
+	}
+
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error while receiving responses: %v", err)
+	}
+	fmt.Printf("Average: %v\n",res.GetResult())
 }

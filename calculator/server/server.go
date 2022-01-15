@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"grpc-greet/calculator/calculatorpb"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -44,6 +45,28 @@ func (*server) PrimeDecomposition(req *calculatorpb.PrimeDecompositionRequest, s
 	return nil
 }
 
+func (*server) Average(stream calculatorpb.AverageService_AverageServer) error {
+	numbers := []int32{}
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			var sum int32 = 0
+			for _, num := range numbers {
+				sum += num
+			}
+			average := float32(sum)/float32(len(numbers))
+			return stream.SendAndClose(&calculatorpb.AverageResponse{
+				Result: average,
+			})
+		}
+		if err != nil {
+			log.Fatalf("Receive stream error: %v", err)
+			return err
+		}
+		numbers = append(numbers, req.GetNumber())
+	}
+}
+
 func main() {
 	fmt.Println("Listening on port 50051")
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
@@ -55,6 +78,7 @@ func main() {
 
 	calculatorpb.RegisterCalSumServiceServer(s, &server{})
 	calculatorpb.RegisterPrimeDecompositionServiceServer(s, &server{})
+	calculatorpb.RegisterAverageServiceServer(s, &server{})
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

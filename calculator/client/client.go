@@ -28,8 +28,11 @@ func main () {
 	// css := calculatorpb.NewPrimeDecompositionServiceClient(cc)
 	// doServerStreaming(css)
 
-	ccs := calculatorpb.NewAverageServiceClient(cc)
-	doClientStreaming(ccs)
+	// ccs := calculatorpb.NewAverageServiceClient(cc)
+	// doClientStreaming(ccs)
+
+	cbs := calculatorpb.NewFindMaxServiceClient(cc)
+	doBidirectionalStreaming(cbs)
 }
 
 func doUnary(c calculatorpb.CalSumServiceClient) {
@@ -90,4 +93,45 @@ func doClientStreaming(c calculatorpb.AverageServiceClient) {
 		log.Fatalf("Error while receiving responses: %v", err)
 	}
 	fmt.Printf("Average: %v\n",res.GetResult())
+}
+
+func doBidirectionalStreaming(c calculatorpb.FindMaxServiceClient) {
+	fmt.Println("Starting a Bidirectional Streaming Call...")
+	numbers := [10]int32{1,2,3,4,10,6,7,4,12,5}
+
+	stream, err := c.FindMax(context.Background())
+	if err != nil {
+		log.Fatalf("Error while creating stream: %v", err)
+		return
+	}
+
+	waitc := make(chan struct{})
+
+	go func(){
+		for _, number := range numbers {
+			req := &calculatorpb.FindMaxRequest{
+				Number: number,
+			}
+			fmt.Printf("Sending request: %v", req)
+			stream.Send(req)
+			time.Sleep(time.Second)
+		}
+		stream.CloseSend()
+	}()
+
+	go func() {
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Error while receiving: %v\n", err)
+			}
+			fmt.Printf("Received: %v\n", res.GetResult())
+		}
+		close(waitc)
+	}()
+
+	<-waitc
 }

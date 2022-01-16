@@ -44,3 +44,16 @@ service AverageService {
   // Client Streaming API
   rpc Average(stream AverageRequest) returns (AverageResponse) {};
 }
+
+message FindMaxRequest {
+  int32 number = 1;
+}
+
+message FindMaxResponse {
+  int32 result = 1;
+}
+
+service FindMaxService {
+  // Bidirectional Streaming API
+  rpc FindMax(stream FindMaxRequest) returns (stream FindMaxResponse) {};
+}

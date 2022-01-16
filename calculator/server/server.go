@@ -67,6 +67,49 @@ func (*server) Average(stream calculatorpb.AverageService_AverageServer) error {
 	}
 }
 
+func (*server) FindMax(stream calculatorpb.FindMaxService_FindMaxServer) error {
+	fmt.Println("Findmax Bidirectional function invoked")
+
+	var max int32 = 0
+	c := make(chan int32)
+	errc := make(chan error)
+
+	go func(errc chan<- error) {
+		for {
+			req, err := stream.Recv()
+			if err == io.EOF {
+				close(c)
+				break
+			}
+	
+			if err != nil {
+				log.Fatalf("Error while receiving request: %v\n", err)
+				errc<-err
+			}
+	
+			c<- req.GetNumber()
+		}
+	}(errc)
+
+	go func(errc chan<- error) {
+		for number := range c {
+			if number > max {
+				max = number
+			}
+			msg := &calculatorpb.FindMaxResponse{
+				Result: max,
+			}
+			if err := stream.Send(msg); err != nil {
+				log.Fatalf("Error sending message: %v\n", err)
+				errc<-err
+			}
+		}
+		errc<-nil
+	}(errc)
+
+	return <-errc
+}
+
 func main() {
 	fmt.Println("Listening on port 50051")
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
@@ -79,6 +122,7 @@ func main() {
 	calculatorpb.RegisterCalSumServiceServer(s, &server{})
 	calculatorpb.RegisterPrimeDecompositionServiceServer(s, &server{})
 	calculatorpb.RegisterAverageServiceServer(s, &server{})
+	calculatorpb.RegisterFindMaxServiceServer(s, &server{})
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

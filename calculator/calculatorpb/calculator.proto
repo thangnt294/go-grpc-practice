@@ -4,7 +4,6 @@ package calculator;
 
 option go_package = "calculatorpb";
 
-// Calculate sum unary API
 message CalSumRequest {
   int32 first_number = 1;
   int32 second_number = 2;
@@ -12,11 +11,6 @@ message CalSumRequest {
 
 message CalSumResponse {
   int32 result = 1;
-}
-
-service CalSumService {
-  // Unary API
-  rpc CalSum(CalSumRequest) returns (CalSumResponse) {};
 }
 
 message PrimeDecompositionRequest {
@@ -27,22 +21,12 @@ message PrimeDecompositionResponse {
   int32 result = 1;
 }
 
-service PrimeDecompositionService {
-  // Server Streaming API
-  rpc PrimeDecomposition(PrimeDecompositionRequest) returns (stream PrimeDecompositionResponse) {};
-}
-
 message AverageRequest {
   int32 number = 1;
 }
 
 message AverageResponse {
   float result = 1;
-}
-
-service AverageService {
-  // Client Streaming API
-  rpc Average(stream AverageRequest) returns (AverageResponse) {};
 }
 
 message FindMaxRequest {
@@ -53,7 +37,16 @@ message FindMaxResponse {
   int32 result = 1;
 }
 
-service FindMaxService {
+service CalculatorService {
+  // Unary API
+  rpc CalSum(CalSumRequest) returns (CalSumResponse) {};
+
+  // Server Streaming API
+  rpc PrimeDecomposition(PrimeDecompositionRequest) returns (stream PrimeDecompositionResponse) {};
+
+  // Client Streaming API
+  rpc Average(stream AverageRequest) returns (AverageResponse) {};
+
   // Bidirectional Streaming API
   rpc FindMax(stream FindMaxRequest) returns (stream FindMaxResponse) {};
 }

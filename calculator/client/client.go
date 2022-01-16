@@ -22,20 +22,17 @@ func main () {
 
 	defer cc.Close()
 
-	// c := calculatorpb.NewCalSumServiceClient(cc)
+	c := calculatorpb.NewCalculatorServiceClient(cc)
 	// doUnary(c)
 
-	// css := calculatorpb.NewPrimeDecompositionServiceClient(cc)
-	// doServerStreaming(css)
+	// doServerStreaming(c)
 
-	// ccs := calculatorpb.NewAverageServiceClient(cc)
-	// doClientStreaming(ccs)
+	// doClientStreaming(c)
 
-	cbs := calculatorpb.NewFindMaxServiceClient(cc)
-	doBidirectionalStreaming(cbs)
+	doBidirectionalStreaming(c)
 }
 
-func doUnary(c calculatorpb.CalSumServiceClient) {
+func doUnary(c calculatorpb.CalculatorServiceClient) {
 	fmt.Println("Starting a Unary Call...")
 	res, err := c.CalSum(context.Background() , &calculatorpb.CalSumRequest{
 		FirstNumber: 10,
@@ -49,7 +46,7 @@ func doUnary(c calculatorpb.CalSumServiceClient) {
 	fmt.Println(res);
 }
 
-func doServerStreaming(c calculatorpb.PrimeDecompositionServiceClient) {
+func doServerStreaming(c calculatorpb.CalculatorServiceClient) {
 	fmt.Println("Starting a Server Streaming Call...")
 	resStream, err := c.PrimeDecomposition(context.Background(), &calculatorpb.PrimeDecompositionRequest{
 		Number: 120,
@@ -70,7 +67,7 @@ func doServerStreaming(c calculatorpb.PrimeDecompositionServiceClient) {
 	}
 }
 
-func doClientStreaming(c calculatorpb.AverageServiceClient) {
+func doClientStreaming(c calculatorpb.CalculatorServiceClient) {
 	fmt.Println("Starting a Client Streaming Call...")
 
 	numbers := [4]int32{1,2,3,4}
@@ -95,7 +92,7 @@ func doClientStreaming(c calculatorpb.AverageServiceClient) {
 	fmt.Printf("Average: %v\n",res.GetResult())
 }
 
-func doBidirectionalStreaming(c calculatorpb.FindMaxServiceClient) {
+func doBidirectionalStreaming(c calculatorpb.CalculatorServiceClient) {
 	fmt.Println("Starting a Bidirectional Streaming Call...")
 	numbers := [10]int32{1,2,3,4,10,6,7,4,12,5}
 

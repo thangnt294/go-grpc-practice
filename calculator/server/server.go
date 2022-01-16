@@ -22,7 +22,7 @@ func (*server) CalSum(ctx context.Context, req *calculatorpb.CalSumRequest) (*ca
 	}, nil
 }
 
-func (*server) PrimeDecomposition(req *calculatorpb.PrimeDecompositionRequest, stream calculatorpb.PrimeDecompositionService_PrimeDecompositionServer) error {
+func (*server) PrimeDecomposition(req *calculatorpb.PrimeDecompositionRequest, stream calculatorpb.CalculatorService_PrimeDecompositionServer) error {
 	fmt.Printf("Prime decomposition was invoked with %v\n", req)
 	var k int32 = 2
 	number := req.GetNumber()
@@ -45,7 +45,7 @@ func (*server) PrimeDecomposition(req *calculatorpb.PrimeDecompositionRequest, s
 	return nil
 }
 
-func (*server) Average(stream calculatorpb.AverageService_AverageServer) error {
+func (*server) Average(stream calculatorpb.CalculatorService_AverageServer) error {
 	numbers := []int32{}
 	for {
 		req, err := stream.Recv()
@@ -67,7 +67,7 @@ func (*server) Average(stream calculatorpb.AverageService_AverageServer) error {
 	}
 }
 
-func (*server) FindMax(stream calculatorpb.FindMaxService_FindMaxServer) error {
+func (*server) FindMax(stream calculatorpb.CalculatorService_FindMaxServer) error {
 	fmt.Println("Findmax Bidirectional function invoked")
 
 	var max int32 = 0
@@ -119,10 +119,7 @@ func main() {
 
 	s := grpc.NewServer()
 
-	calculatorpb.RegisterCalSumServiceServer(s, &server{})
-	calculatorpb.RegisterPrimeDecompositionServiceServer(s, &server{})
-	calculatorpb.RegisterAverageServiceServer(s, &server{})
-	calculatorpb.RegisterFindMaxServiceServer(s, &server{})
+	calculatorpb.RegisterCalculatorServiceServer(s, &server{})
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
